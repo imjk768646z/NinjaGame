@@ -1,0 +1,30 @@
+{
+  "__version__": "1.0.1",
+  "physics": {
+    "collisionGroups": [
+      {
+        "index": 1,
+        "name": "BULLET"
+      },
+      {
+        "index": 2,
+        "name": "PLAYER_LEFT"
+      },
+      {
+        "index": 3,
+        "name": "PLAYER_RIGHT"
+      },
+      {
+        "index": 4,
+        "name": "PLATFORM"
+      }
+    ],
+    "collisionMatrix": {
+      "0": 31,
+      "1": 29,
+      "2": 19,
+      "3": 19,
+      "4": 31
+    }
+  }
+}
