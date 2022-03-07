@@ -49,10 +49,14 @@ export class Kunai extends Component {
         if(selfCollider.group == 2 && otherCollider.group == 8) {
             this._destoryKunai = true;
         }
-        // 苦無和牆面發生撞擊
+        // 苦無和地面發生撞擊
         if(selfCollider.group == 2 && otherCollider.group == 16) {
             this._destoryKunai = true;
-        }    
+        }
+        // 苦無和牆面發生撞擊
+        if(selfCollider.group == 2 && otherCollider.group == 32) {
+            this._destoryKunai = true;
+        } 
     }
     
     public moveDirection(currDir) {

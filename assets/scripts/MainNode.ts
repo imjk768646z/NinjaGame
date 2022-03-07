@@ -45,8 +45,8 @@ export class MainNode extends Component {
     public player2Attack = false;  //玩家2攻擊狀態
     public player1Air = false; //玩家1處於空中狀態
     public player2Air = false; //玩家2處於空中狀態
-    public player1Jump = false; //玩家1跳躍狀態
-    public player2Jump = false; //玩家2跳躍狀態
+    public player1Jump = false; //玩家1準備跳躍狀態
+    public player2Jump = false; //玩家2準備跳躍狀態
     public player1DeltaCount = 0; //玩家1每幀觸發的次數
     public player2DeltaCount = 0; //玩家2每幀觸發的次數
     public playerNumber = 0; //玩家數量
@@ -280,6 +280,10 @@ export class MainNode extends Component {
         if(selfCollider.group == 4 && otherCollider.group == 16){
             this.player1Air = false;
         }
+        // 觸碰到牆面屬於空中狀態不能再次跳躍
+        if(selfCollider.group == 4 && otherCollider.group == 32){
+            this.player1Air = true;
+        }
         // 子彈擊中角色
         if(selfCollider.group == 4 && otherCollider.group == 2){
             console.log('玩家1扣血');
@@ -308,6 +312,10 @@ export class MainNode extends Component {
         // 落地後才能再次跳躍
         if(selfCollider.group == 8 && otherCollider.group == 16){
             this.player2Air = false;
+        }
+        // 觸碰到牆面屬於空中狀態不能再次跳躍
+        if(selfCollider.group == 8 && otherCollider.group == 32){
+            this.player1Air = true;
         }
         // 子彈擊中角色
         if(selfCollider.group == 8 && otherCollider.group == 2){
