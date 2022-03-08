@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, systemEvent, SystemEvent, EventMouse, EventKeyboard, KeyCode, Vec2, RigidBody2D, dragonBones, Prefab, Asset, Sprite, SpriteFrame, UITransform, BoxCollider2D, ITriggerEvent, Contact2DType, Label, Button, Camera } from 'cc';
+import { _decorator, Component, Node, systemEvent, SystemEvent, EventMouse, EventKeyboard, KeyCode, Vec2, RigidBody2D, dragonBones, Prefab, Asset, Sprite, SpriteFrame, UITransform, BoxCollider2D, ITriggerEvent, Contact2DType, Label, Button, Camera, Vec3 } from 'cc';
 import { AudioManager } from './Framework/AudioManager';
 import { GameManager } from './Framework/GameManager';
 const { ccclass, property } = _decorator;
@@ -50,14 +50,15 @@ export class MainNode extends Component {
     public player1DeltaCount = 0; //玩家1每幀觸發的次數
     public player2DeltaCount = 0; //玩家2每幀觸發的次數
     public playerNumber = 0; //玩家數量
+    public character = null; //玩家扮演的角色
 
     private _switch = false; //進入遊戲的開關
     private _player1InjuriedCount = 0; //玩家1受到攻擊的次數
     private _player2InjuriedCount = 0; //玩家2受到攻擊的次數
     
     // 宣告物件屬性時不要指定型別為Object，TypeScript和JavaScript定義Object的方式不同。
-    // meta(狀態) id(玩家位置) direction(面相方向) playerNum(房間人數) player1/2(玩家1/2遊戲狀態)
-    private obj = {'meta':'join', 'id':null, 'direction':null,
+    // meta(狀態) id(玩家1/玩家2) direction(面相方向) coordinate(座標) playerNum(房間人數) player1/2(玩家1/2遊戲狀態)
+    private obj = {'meta':'join', 'id':null, 'direction':null, 'coordinate':null,
     'playerNum': null, 'player1': null, 'player2': null, 'p1Period': false, 'p2Period': false};
     // private obj = {'meta':'join', 'room': null, 'id':null, 'weapon':null, 'direction':null, 
     // 'playerNum': null, 'playerSta': null, 'player1': null, 'player2': null, 'p1Period': false, 'p2Period': false};
@@ -94,7 +95,7 @@ export class MainNode extends Component {
         this.ws.send(JSON.stringify(this.obj));
         // 接收後端傳回的訊息
         this.ws.onmessage = (msg) => {
-            let { meta,id,direction,playerNum,player1,player2,p1Period,p2Period } = JSON.parse(msg.data);
+            let { meta,id,direction,coordinate,playerNum,player1,player2,p1Period,p2Period } = JSON.parse(msg.data);
             // 加入房間的流程開始
             // 只有一個玩家時才會觸發條件，一旦有兩個玩家後此條件不再觸發
             if(meta == 'join' && playerNum == 1){
@@ -103,6 +104,7 @@ export class MainNode extends Component {
                     this.onWait(); //等待玩家定時器
                 }
                 this.cleanTips();  //清空提示訊息
+                this.character = id;
             }
             if(meta == 'join' && playerNum == 2){
                 console.log('目前有' + playerNum + '個玩家');
@@ -116,6 +118,7 @@ export class MainNode extends Component {
                 // 再玩一局時會停留在check狀態，強制改為join狀態讓玩家重新跑一次流程
                 this.obj.meta = 'join';
                 // this.cleanTips(); //清空提示訊息
+                this.character = id;
             }
             //後端傳回的房間人數有兩個玩家即可進入遊戲
             if(meta == 'check' && playerNum == 2) {
@@ -142,6 +145,7 @@ export class MainNode extends Component {
                     // 重置玩家1、玩家2的面相方向
                     this.player1.setScale(0.06,0.06);
                     this.player2.setScale(-0.06,0.06);
+                    console.log(this.character);
                     }
                 }
             }
@@ -196,10 +200,16 @@ export class MainNode extends Component {
                     this.player1Move = false;
                     this.player1DeltaCount = 0;
                     this.player1.getComponent(dragonBones.ArmatureDisplay).playAnimation('stopAnimation');
+                    if(this._switch){
+                        this.player1.setPosition(coordinate);
+                    }
                 }else if(id == 'player2'){
                     this.player2Move = false;
                     this.player2DeltaCount = 0;
                     this.player2.getComponent(dragonBones.ArmatureDisplay).playAnimation('stopAnimation');
+                    if(this._switch){
+                        this.player2.setPosition(coordinate);
+                    }
                 }
             }
             if(meta == 'result'){            
@@ -401,6 +411,23 @@ export class MainNode extends Component {
         pp2.linearVelocity = p2LiVe;
     }
 
+    leftCoordinate(player) { 
+        if(player == 'player1'){
+            // this.obj.coordinate = this.player1.position;
+            this.obj.coordinate = new Vec3(this.player1.position.x - 10,this.player1.position.y,0);
+        }else if(player == 'player2'){
+            // this.obj.coordinate = this.player2.position;
+            this.obj.coordinate = new Vec3(this.player2.position.x - 10,this.player2.position.y,0);
+        }
+    }
+    rightCoordinate(player) {
+        if(player == 'player1'){
+            this.obj.coordinate = new Vec3(this.player1.position.x + 10,this.player1.position.y,0);
+        }else if(player == 'player2'){
+            this.obj.coordinate = new Vec3(this.player2.position.x + 10,this.player2.position.y,0);
+        }
+    }
+
     playAudioEffect(name: string){
         this.audioEffect.play(name);
     }
@@ -409,10 +436,12 @@ export class MainNode extends Component {
         switch (event.keyCode) {
             case 37: //left
                 this.obj.meta = 'stop';
+                this.leftCoordinate(this.character); //停止移動時取得角色位置
                 this.ws.send(JSON.stringify(this.obj));
                 break;
             case 39: //right
                 this.obj.meta = 'stop';
+                this.rightCoordinate(this.character); //停止移動時取得角色位置
                 this.ws.send(JSON.stringify(this.obj));
                 break;
             case 32: //空白鍵
@@ -478,6 +507,7 @@ export class MainNode extends Component {
     }
 
     update (deltaTime: number) {
+        
         if(this.player1Jump){
             this.player1OnJump();
         }

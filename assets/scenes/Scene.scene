@@ -1762,12 +1762,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": -276.4,
-      "y": -94.3
+      "y": -89.8
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 108.8,
-      "height": 12.8
+      "height": 3.8
     },
     "_id": "b2G7/vwzVBOoWNnUXqcAPy"
   },
@@ -1870,12 +1870,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 266.2,
-      "y": -91.6
+      "y": -86.5
     },
     "_size": {
       "__type__": "cc.Size",
       "width": 105.3,
-      "height": 14
+      "height": 3.8
     },
     "_id": "d96lEo9QhBKZNuKlrP07uV"
   },
